@@ -26,7 +26,8 @@ namespace cartelo
 PoseTeleoperation::PoseTeleoperation(const rclcpp::NodeOptions & options)
 : Node("pose_teleoperation", options)
 {
-  param_listener_ = std::make_shared<pose_teleoperation::ParamListener>(get_node_parameters_interface());
+  param_listener_ =
+    std::make_shared<pose_teleoperation::ParamListener>(get_node_parameters_interface());
   params_ = param_listener_->get_params();
 
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
@@ -34,28 +35,28 @@ PoseTeleoperation::PoseTeleoperation(const rclcpp::NodeOptions & options)
   tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 
   joystick_handler_ = std::make_shared<JoystickHandler>(this, params_.joystick.topic);
-  
+
   joystick_handler_->register_on_press(params_.joystick.calibrate_frame_button, [this]() {
-    try {
-      calibrate_frame();
-    } catch (const std::exception & e) {
-      RCLCPP_ERROR(this->get_logger(), "Failed to calibrate frame: %s", e.what());
-    }
+      try {
+        calibrate_frame();
+      } catch (const std::exception & e) {
+        RCLCPP_ERROR(this->get_logger(), "Failed to calibrate frame: %s", e.what());
+      }
   });
 
   joystick_handler_->register_on_press(params_.joystick.teleoperation_button, [this]() {
-    try {
-      start_teleoperation();
-    } catch (const std::exception & e) {
-      RCLCPP_ERROR(this->get_logger(), "Failed to start teleoperation: %s", e.what());
-    }
+      try {
+        start_teleoperation();
+      } catch (const std::exception & e) {
+        RCLCPP_ERROR(this->get_logger(), "Failed to start teleoperation: %s", e.what());
+      }
   });
   joystick_handler_->register_on_release(params_.joystick.teleoperation_button, [this]() {
-    try {
-      stop_teleoperation();
-    } catch (const std::exception & e) {
-      RCLCPP_ERROR(this->get_logger(), "Failed to stop teleoperation: %s", e.what());
-    }
+      try {
+        stop_teleoperation();
+      } catch (const std::exception & e) {
+        RCLCPP_ERROR(this->get_logger(), "Failed to stop teleoperation: %s", e.what());
+      }
   });
 
   pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(
@@ -100,7 +101,8 @@ void PoseTeleoperation::start_teleoperation()
       tf2::TimePointZero);
   } catch (const tf2::TransformException & ex) {
     throw std::runtime_error(
-      "Could not transform " + params_.base_frame_id + " to " + params_.end_effector_frame_id + ": " + ex.what());
+      "Could not transform " + params_.base_frame_id + " to " + params_.end_effector_frame_id +
+        ": " + ex.what());
   }
 
   try {
@@ -110,7 +112,8 @@ void PoseTeleoperation::start_teleoperation()
       tf2::TimePointZero);
   } catch (const tf2::TransformException & ex) {
     throw std::runtime_error(
-      "Could not transform " + params_.base_frame_id + " to " + params_.controller_frame_id + ": " + ex.what());
+      "Could not transform " + params_.base_frame_id + " to " + params_.controller_frame_id + ": " +
+        ex.what());
   }
 
   tf2::Transform b_T_e, b_T_c;
@@ -142,7 +145,8 @@ std::optional<geometry_msgs::msg::TransformStamped> PoseTeleoperation::get_frame
       tf2::TimePointZero);
   } catch (const tf2::TransformException & ex) {
     throw std::runtime_error(
-      "Could not transform " + params_.virtual_world_frame_id + " to " + params_.controller_frame_id + ": " + ex.what());
+      "Could not transform " + params_.virtual_world_frame_id + " to " +
+        params_.controller_frame_id + ": " + ex.what());
   }
 
   geometry_msgs::msg::TransformStamped v_T_b;
@@ -154,9 +158,9 @@ std::optional<geometry_msgs::msg::TransformStamped> PoseTeleoperation::get_frame
   tf2::fromMsg(v_T_c_msg.transform, v_T_c);
 
   tf2::Matrix3x3 rot_mat(
-     0, -1,  0,
-     0,  0,  1,
-    -1,  0,  0);
+    0, -1, 0,
+    0, 0, 1,
+    -1, 0, 0);
   tf2::Vector3 trans_vec(0, 0, 0);
   tf2::Transform conversion_transform(rot_mat, trans_vec);
 
@@ -194,7 +198,8 @@ void PoseTeleoperation::publish_target_pose()
       tf2::TimePointZero);
   } catch (const tf2::TransformException & ex) {
     throw std::runtime_error(
-      "Could not transform " + params_.base_frame_id + " to " + params_.controller_frame_id + ": " + ex.what());
+      "Could not transform " + params_.base_frame_id + " to " + params_.controller_frame_id + ": " +
+        ex.what());
   }
 
   geometry_msgs::msg::PoseStamped msg;

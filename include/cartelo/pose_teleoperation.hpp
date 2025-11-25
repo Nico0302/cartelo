@@ -36,34 +36,33 @@ public:
   virtual ~PoseTeleoperation();
 
 private:
-
   /**
    * @brief Calibrate the reference frame for teleoperation by holding the controller close to the robot base.
-   * 
+   *
    */
   void calibrate_frame();
 
   /**
    * @brief Start teleoperation by calculating the initial transform delta between the controller and the end-effector.
-   * 
+   *
    */
   void start_teleoperation();
 
   /**
    * @brief Stop teleoperation by clearing the transform delta.
-   * 
+   *
    */
   void stop_teleoperation();
 
   /**
    * @brief Publish the target end-effector pose based on the controller's current pose and the transform delta.
-   * 
+   *
    */
   void publish_target_pose();
 
   /**
    * @brief Broadcast the frame transform between the virtual world and the controller.
-   * 
+   *
    */
   void broadcast_frame_transform();
 

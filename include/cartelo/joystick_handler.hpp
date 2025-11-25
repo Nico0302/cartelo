@@ -27,7 +27,7 @@ namespace cartelo
 {
 /**
  * @brief Joystick handler class.
- * 
+ *
  * Handles joystick input and provides callbacks for button presses and releases.
  */
 class JoystickHandler
@@ -37,7 +37,7 @@ public:
 
   /**
    * @brief Construct a new Joystick Handler object
-   * 
+   *
    * @param node ROS 2 node.
    * @param topic_name Name of the joystick topic to subscribe to.
    */
@@ -45,7 +45,7 @@ public:
 
   /**
    * @brief Register a callback to be called when a button is pressed.
-   * 
+   *
    * @param button_index Index of the button.
    * @param cb Callback function.
    */
@@ -53,7 +53,7 @@ public:
 
   /**
    * @brief Register a callback to be called when a button is released.
-   * 
+   *
    * @param button_index Index of the button.
    * @param cb Callback function.
    */
