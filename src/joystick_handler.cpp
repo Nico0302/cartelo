@@ -70,9 +70,9 @@ void JoystickHandler::joystick_callback(const sensor_msgs::msg::Joy::SharedPtr m
 
   for (size_t i = 0; i < msg->axes.size(); ++i) {
     if (axis_callbacks_.count(i)) {
-        for (const auto & cb : axis_callbacks_[i]) {
-            cb(msg->axes[i]);
-        }
+      for (const auto & cb : axis_callbacks_[i]) {
+        cb(msg->axes[i]);
+      }
     }
   }
 

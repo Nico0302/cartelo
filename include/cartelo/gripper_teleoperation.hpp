@@ -18,6 +18,7 @@
 #include <memory>
 
 #include "rclcpp_action/rclcpp_action.hpp"
+
 #include "control_msgs/action/gripper_command.hpp"
 #include "std_msgs/msg/float64.hpp"
 
@@ -34,8 +35,23 @@ public:
   ~GripperTeleoperation();
 
 private:
+  /**
+  * @brief Set the desired gripper state and send it to the gripper.
+  * 
+  * @param state 
+  */
   void set_state(double state);
+
+  /**
+  * @brief Publish the desired, normalized state of the gripper.
+  * 
+  */
   void publish_state();
+
+  /**
+  * @brief Send the command to the gripper.
+  * 
+  */
   void send_command();
 
   std::shared_ptr<gripper_teleoperation::ParamListener> param_listener_;
@@ -46,7 +62,7 @@ private:
 
   rclcpp_action::Client<control_msgs::action::GripperCommand>::SharedPtr gripper_client_;
 
-  double current_state_{0.0};
+  double current_state_{0.0}; // Current state of the gripper normalized between 0.0 and 1.0
   rclcpp::TimerBase::SharedPtr publish_state_timer_;
 };
 

@@ -15,13 +15,17 @@ flowchart LR
     c([Cartelo])
     ik([IK])
     j([Joints])
+    g([Gripper])
     i --> c --> ik --> j
+    c --> g
 ```
 
 Cartelo can take any [tf2](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Tf2/Tf2-Main.html) frame and an optional `Joy` topic and output a desired target pose to an inverse kinematic node (like MoveIt2 Servo, Cartesian Controllers, CRISP Controllers, etc.).
 
 To start teleportation, the operator can move the 3D tracking device close to the robot base and press the preconfigured calibration button (i.e. menu button). 
 Now all movements will be transferred to the robot as long as the teleportation button (i.e. side grippers) is pressed down.
+
+Additionally, the operator can use the preconfigured buttons or axes to control the gripper.
 
 ## HTC VIVE <> SO-101 Setup
 

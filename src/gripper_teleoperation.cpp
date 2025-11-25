@@ -16,8 +16,6 @@
 
 #include "rclcpp_components/register_node_macro.hpp"
 #include "control_msgs/action/gripper_command.hpp"
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp_action/rclcpp_action.hpp"
 
 namespace cartelo
 {
@@ -29,7 +27,8 @@ GripperTeleoperation::GripperTeleoperation(const rclcpp::NodeOptions & options)
     std::make_shared<gripper_teleoperation::ParamListener>(get_node_parameters_interface());
   params_ = param_listener_->get_params();
 
-  gripper_client_ = rclcpp_action::create_client<control_msgs::action::GripperCommand>(this, params_.command_topic);
+  gripper_client_ = rclcpp_action::create_client<control_msgs::action::GripperCommand>(this,
+      params_.command_topic);
 
   if (params_.state_topic != "") {
     state_pub_ = this->create_publisher<std_msgs::msg::Float64>(params_.state_topic, 10);
