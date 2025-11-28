@@ -77,7 +77,19 @@ def generate_launch_description():
         package="cartelo",
         plugin="cartelo::PoseTeleoperation",
         name="pose_teleoperation",
-        parameters=[{"end_effector_frame_id": "gripper_frame_link"}],
+        parameters=[
+            {
+                "end_effector_frame_id": "gripper_frame_link",
+                "bounds.z_min": 0.01,
+                "bounds.z_max": 0.4,
+                "bounds.x_min": -0.2,
+                "bounds.x_max": 0.4,
+                "bounds.y_min": -0.4,
+                "bounds.y_max": 0.4,
+                "use_relative_pose": False,
+                "update_rate": 100,
+            }
+        ],
     )
 
     gripper_teleoperation = ComposableNode(
@@ -92,12 +104,6 @@ def generate_launch_description():
                 "gripper_command_topic": "/gripper_controller/gripper_cmd",
                 "joystick.toggle_button": 0,
                 "joystick.gripper_axis": 1,
-                "bounds.z_max": 0.4,
-                "bounds.x_min": -0.2,
-                "bounds.x_max": 0.4,
-                "bounds.y_min": -0.4,
-                "bounds.y_max": 0.4,
-                "use_relative_poses": True,
             }
         ],
     )

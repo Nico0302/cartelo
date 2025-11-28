@@ -16,9 +16,9 @@ pose_teleoperation:
     default_value: "gripper_link"
     description: "Frame ID for the robot arm end effector"
 
-  use_relative_poses:
+  use_relative_pose:
     type: bool
-    default_value: false
+    default_value: False
     description: "Use relative poses for teleoperation (if false, absolute poses are used)"
   
   joystick:
@@ -30,7 +30,7 @@ pose_teleoperation:
       type: int
       default_value: 7
       description: "Button to start/stop teleoperation (while being pressed)"
-  publishing_rate:
+  update_rate:
     type: int
     default_value: 100
     description: "Rate at which to publish target pose in Hz"

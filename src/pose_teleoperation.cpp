@@ -63,7 +63,7 @@ PoseTeleoperation::PoseTeleoperation(const rclcpp::NodeOptions & options)
   pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(
     "target_pose", 3);
 
-  double period = 1.0 / params_.publishing_rate;
+  double period = 1.0 / params_.update_rate;
   pose_timer_ = this->create_wall_timer(
     std::chrono::duration<double>(period),
     std::bind(&PoseTeleoperation::publish_target_pose, this));
@@ -117,11 +117,14 @@ void PoseTeleoperation::start_teleoperation()
   delta.setOrigin(b_T_c.getOrigin() - b_T_e.getOrigin());
   delta.setRotation(b_T_e.getRotation().inverse() * b_T_c.getRotation());
   delta_ = delta;
+
+  last_controller_transform_.reset();
 }
 
 void PoseTeleoperation::stop_teleoperation()
 {
   delta_.reset();
+  last_controller_transform_.reset();
 }
 
 std::optional<geometry_msgs::msg::TransformStamped> PoseTeleoperation::get_frame_transform()
@@ -179,13 +182,15 @@ void PoseTeleoperation::publish_target_pose()
     return;
   }
 
-  geometry_msgs::msg::TransformStamped b_T_c_msg;
+  tf2::Transform b_T_c, b_T_e, target;
 
   try {
-    b_T_c_msg = tf_buffer_->lookupTransform(
+    auto b_T_c_msg = tf_buffer_->lookupTransform(
       params_.base_frame_id,
       params_.controller_frame_id,
       tf2::TimePointZero);
+    tf2::fromMsg(b_T_c_msg.transform, b_T_c);
+    
   } catch (const tf2::TransformException & ex) {
     throw std::runtime_error(
       "Could not transform " + params_.base_frame_id + " to " + params_.controller_frame_id + ": " +
@@ -194,34 +199,40 @@ void PoseTeleoperation::publish_target_pose()
 
   geometry_msgs::msg::PoseStamped msg;
   msg.header.stamp = this->now();
+  msg.header.frame_id = params_.base_frame_id;
 
-  tf2::Transform b_T_c;
-  tf2::fromMsg(b_T_c_msg.transform, b_T_c);
+  if (params_.use_relative_pose) {
+    if (!last_controller_transform_) {
+      last_controller_transform_ = b_T_c;
+      return;
+    }
 
-  if (params_.use_relative_poses) {
-    msg.header.frame_id = params_.end_effector_frame_id;
+    try {
+      auto b_T_e_msg = tf_buffer_->lookupTransform(
+        params_.base_frame_id,
+        params_.end_effector_frame_id,
+        tf2::TimePointZero).transform;
+      tf2::fromMsg(b_T_e_msg, b_T_e);
+    } catch (const tf2::TransformException & ex) {
+      throw std::runtime_error(
+        "Could not transform " + params_.base_frame_id + " to " + params_.end_effector_frame_id + ": " +
+          ex.what());
+    }
 
-    tf2::Transform current_transform;
-    tf2::fromMsg(b_T_c_msg.transform, current_transform);
-
-    tf2::Transform delta = last_controller_transform_->inverse() * current_transform;
+    tf2::Transform delta = last_controller_transform_->inverse() * b_T_c;
     
-    tf2::Vector3 pos = delta.getOrigin();
-    tf2::Quaternion rot = delta.getRotation();
+    target = b_T_e * delta.inverse();
 
-    msg.pose.position.x = pos.x();
-    msg.pose.position.y = pos.y();
-    msg.pose.position.z = pos.z();
-    msg.pose.orientation = tf2::toMsg(rot);
-
-    last_controller_transform_ = current_transform;
+    last_controller_transform_ = b_T_c;
   } else {
-    msg.header.frame_id = params_.base_frame_id;
+    target.setOrigin(b_T_c.getOrigin() - delta_->getOrigin());
+    target.setRotation(b_T_c.getRotation() * delta_->getRotation().inverse());
+  }
 
-    tf2::Vector3 pos = b_T_c.getOrigin() - delta_->getOrigin();
-    tf2::Quaternion rot = b_T_c.getRotation() * delta_->getRotation().inverse();
+    tf2::Vector3 pos = target.getOrigin();
+    tf2::Quaternion rot = target.getRotation();
 
-    if (params_.bounds.enabled) {
+  if (params_.bounds.enabled) {
       pos.setX(
         std::clamp(
           pos.x(),
@@ -243,7 +254,6 @@ void PoseTeleoperation::publish_target_pose()
     msg.pose.position.y = pos.y();
     msg.pose.position.z = pos.z();
     msg.pose.orientation = tf2::toMsg(rot);
-  }
 
   pose_pub_->publish(msg);
 }
