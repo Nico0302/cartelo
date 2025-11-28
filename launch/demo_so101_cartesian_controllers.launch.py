@@ -6,6 +6,7 @@ from launch_ros.substitutions import FindPackageShare
 from launch_ros.actions import SetRemap, ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
 
+
 def generate_launch_description():
     # Declare arguments
     declared_arguments = [
@@ -47,17 +48,28 @@ def generate_launch_description():
 
     so101_bringup_launch = GroupAction(
         actions=[
-
-            SetRemap(src='/cartesian_motion_controller/target_frame',dst='/target_pose'),
-
+            SetRemap(
+                src="/cartesian_motion_controller/target_frame", dst="/target_pose"
+            ),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
                     PathJoinSubstitution(
-                        [FindPackageShare("so101_description"), "launch", "bringup.launch.py"]
+                        [
+                            FindPackageShare("so101_description"),
+                            "launch",
+                            "bringup.launch.py",
+                        ]
                     )
                 ),
-                launch_arguments={"prefix": prefix, "usb_port": usb_port, "use_sim": use_sim, "use_fake_hardware": use_fake_hardware, "controllers_file": "ros2_cartesian_controllers.yaml", "arm_controller": "cartesian_motion_controller"}.items(),
-        )
+                launch_arguments={
+                    "prefix": prefix,
+                    "usb_port": usb_port,
+                    "use_sim": use_sim,
+                    "use_fake_hardware": use_fake_hardware,
+                    "controllers_file": "ros2_cartesian_controllers.yaml",
+                    "arm_controller": "cartesian_motion_controller",
+                }.items(),
+            ),
         ]
     )
 
@@ -65,9 +77,7 @@ def generate_launch_description():
         package="cartelo",
         plugin="cartelo::PoseTeleoperation",
         name="pose_teleoperation",
-        parameters=[
-            {"end_effector_frame_id": "gripper_frame_link"}
-        ]
+        parameters=[{"end_effector_frame_id": "gripper_frame_link"}],
     )
 
     gripper_teleoperation = ComposableNode(
@@ -75,8 +85,36 @@ def generate_launch_description():
         plugin="cartelo::GripperTeleoperation",
         name="gripper_teleoperation",
         parameters=[
-            {"joint_name": "gripper", "max_value": 1.745329252, "min_value": -0.1745329252, "gripper_command_topic": "/gripper_controller/gripper_cmd", "joystick.toggle_button": -1, "joystick.gripper_axis": 1}
-        ]
+            {
+                "joint_name": "gripper",
+                "max_target_value": 1.745329252,
+                "min_target_value": -0.1745329252,
+                "gripper_command_topic": "/gripper_controller/gripper_cmd",
+                "joystick.toggle_button": 0,
+                "joystick.gripper_axis": 1,
+                "bounds.z_max": 0.4,
+                "bounds.x_min": -0.2,
+                "bounds.x_max": 0.4,
+                "bounds.y_min": -0.4,
+                "bounds.y_max": 0.4,
+                "use_relative_poses": True,
+            }
+        ],
+    )
+
+    vive_node = ComposableNode(
+        package="libsurvive_ros2",
+        plugin="libsurvive_ros2::Component",
+        name="libsurvive_ros2_component",
+        parameters=[
+            {"driver_args": f"--v 100 --force-calibrate"},
+            {"tracking_frame": "teleop_world"},
+            {"imu_topic": "imu"},
+            {"joy_topic": "joy"},
+            {"cfg_topic": "cfg"},
+            {"lighthouse_rate": 4.0},
+        ],
+        extra_arguments=[{"use_intra_process_comms": True}],
     )
 
     composed_node = ComposableNodeContainer(
@@ -86,9 +124,10 @@ def generate_launch_description():
         executable="component_container_mt",
         composable_node_descriptions=[
             pose_teleoperation,
-            gripper_teleoperation
+            gripper_teleoperation,
+            vive_node,
         ],
-        output="screen",
+        output="log",
     )
 
     nodes = [

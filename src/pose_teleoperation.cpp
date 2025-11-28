@@ -179,7 +179,6 @@ void PoseTeleoperation::publish_target_pose()
     return;
   }
 
-  params_ = param_listener_->get_params();
   geometry_msgs::msg::TransformStamped b_T_c_msg;
 
   try {
@@ -195,20 +194,56 @@ void PoseTeleoperation::publish_target_pose()
 
   geometry_msgs::msg::PoseStamped msg;
   msg.header.stamp = this->now();
-  msg.header.frame_id = params_.base_frame_id;
 
   tf2::Transform b_T_c;
   tf2::fromMsg(b_T_c_msg.transform, b_T_c);
 
-  tf2::Transform b_T_e = tf2::Transform::getIdentity();
+  if (params_.use_relative_poses) {
+    msg.header.frame_id = params_.end_effector_frame_id;
 
-  b_T_e.setOrigin(b_T_c.getOrigin() - delta_->getOrigin());
-  b_T_e.setRotation(b_T_c.getRotation() * delta_->getRotation().inverse());
+    tf2::Transform current_transform;
+    tf2::fromMsg(b_T_c_msg.transform, current_transform);
 
-  msg.pose.position.x = b_T_e.getOrigin().x();
-  msg.pose.position.y = b_T_e.getOrigin().y();
-  msg.pose.position.z = b_T_e.getOrigin().z();
-  msg.pose.orientation = tf2::toMsg(b_T_e.getRotation());
+    tf2::Transform delta = last_controller_transform_->inverse() * current_transform;
+    
+    tf2::Vector3 pos = delta.getOrigin();
+    tf2::Quaternion rot = delta.getRotation();
+
+    msg.pose.position.x = pos.x();
+    msg.pose.position.y = pos.y();
+    msg.pose.position.z = pos.z();
+    msg.pose.orientation = tf2::toMsg(rot);
+
+    last_controller_transform_ = current_transform;
+  } else {
+    msg.header.frame_id = params_.base_frame_id;
+
+    tf2::Vector3 pos = b_T_c.getOrigin() - delta_->getOrigin();
+    tf2::Quaternion rot = b_T_c.getRotation() * delta_->getRotation().inverse();
+
+    if (params_.bounds.enabled) {
+      pos.setX(
+        std::clamp(
+          pos.x(),
+          params_.bounds.x_min,
+          params_.bounds.x_max));
+      pos.setY(
+        std::clamp(
+          pos.y(),
+          params_.bounds.y_min,
+          params_.bounds.y_max));
+      pos.setZ(
+        std::clamp(
+          pos.z(),
+          params_.bounds.z_min,
+          params_.bounds.z_max));
+    }
+
+    msg.pose.position.x = pos.x();
+    msg.pose.position.y = pos.y();
+    msg.pose.position.z = pos.z();
+    msg.pose.orientation = tf2::toMsg(rot);
+  }
 
   pose_pub_->publish(msg);
 }

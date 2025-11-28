@@ -15,6 +15,12 @@ pose_teleoperation:
     type: string
     default_value: "gripper_link"
     description: "Frame ID for the robot arm end effector"
+
+  use_relative_poses:
+    type: bool
+    default_value: false
+    description: "Use relative poses for teleoperation (if false, absolute poses are used)"
+  
   joystick:
     calibrate_button:
       type: int
@@ -28,3 +34,33 @@ pose_teleoperation:
     type: int
     default_value: 100
     description: "Rate at which to publish target pose in Hz"
+
+  bounds:
+    enabled:
+      type: bool
+      default_value: true
+      description: "Enable boundary limits for the end effector position based on the base frame"
+    x_min:
+      type: double
+      default_value: -0.5
+      description: "Minimum X position for the end effector in meters"
+    x_max:
+      type: double
+      default_value: 0.5
+      description: "Maximum X position for the end effector in meters"
+    y_min:
+      type: double
+      default_value: -0.5
+      description: "Minimum Y position for the end effector in meters"
+    y_max:
+      type: double
+      default_value: 0.5
+      description: "Maximum Y position for the end effector in meters"
+    z_min:
+      type: double
+      default_value: 0.0
+      description: "Minimum Z position for the end effector in meters"
+    z_max:
+      type: double
+      default_value: 1.0
+      description: "Maximum Z position for the end effector in meters"

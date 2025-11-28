@@ -26,3 +26,9 @@ To start teleportation, the operator can move the 3D tracking device close to th
 Now all movements will be transferred to the robot as long as the teleportation button (i.e. side grippers) is pressed down.
 
 Additionally, the operator can use the preconfigured buttons or axes to control the gripper.
+
+## Demo
+
+```bash
+ros2 launch cartelo demo_so101_cartesian_controllers.launch.py
+```

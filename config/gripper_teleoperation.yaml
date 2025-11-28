@@ -3,19 +3,31 @@ gripper_teleoperation:
     open_button: 
       type: int
       default_value: -1
-      description: "Button to open the gripper for binary control"
+      description: "Button to open the gripper for binary control (-1 to disable)"
     close_button: 
       type: int
       default_value: -1
-      description: "Button to close the gripper for binary control"
+      description: "Button to close the gripper for binary control (-1 to disable)"
     toggle_button:
       type: int
       default_value: 0
-      description: "Button to toggle the gripper state for binary control (-1 for no toggle button)"
+      description: "Button to toggle the gripper state for binary control (-1 to disable)"
     gripper_axis:
       type: int
       default_value: -1
-      description: "Axis to control the gripper position for continuous control"
+      description: "Axis to control the gripper position for continuous control (-1 to disable)"
+    invert_axis:
+      type: bool
+      default_value: true
+      description: "Invert the joystick axis for gripper control"
+    min_axis_value:
+      type: double
+      default_value: 0.0
+      description: "Minimum value of the joystick axis for gripper control"
+    max_axis_value:
+      type: double
+      default_value: 1.0
+      description: "Maximum value of the joystick axis for gripper control"
 
   gripper_command_topic:
     type: string
@@ -27,12 +39,12 @@ gripper_teleoperation:
     default_value: "gripper"
     description: "Name of the gripper joint to control"
 
-  min_value:
+  min_target_value:
     type: double
     default_value: 0.0
     description: "Minimum position for the gripper in meters or radiants"
 
-  max_value:
+  max_target_value:
     type: double
     default_value: 0.01
     description: "Maximum position for the gripper in meters or radiants"

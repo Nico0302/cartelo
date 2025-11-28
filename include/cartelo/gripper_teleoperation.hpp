@@ -20,7 +20,6 @@
 #include "rclcpp_action/rclcpp_action.hpp"
 
 #include "control_msgs/action/parallel_gripper_command.hpp"
-#include "std_msgs/msg/float64.hpp"
 
 #include "cartelo/joystick_handler.hpp"
 #include "cartelo/gripper_teleoperation_parameters.hpp"
@@ -28,6 +27,10 @@
 namespace cartelo
 {
 
+  /**
+   * @brief Teleoperation node for a gripper using a joystick.
+   * 
+   */
 class GripperTeleoperation : public rclcpp::Node
 {
 public:
@@ -58,11 +61,12 @@ private:
   gripper_teleoperation::Params params_;
 
   std::shared_ptr<JoystickHandler> joystick_handler_;
-  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr state_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr state_pub_;
 
   rclcpp_action::Client<control_msgs::action::ParallelGripperCommand>::SharedPtr gripper_client_;
 
   double current_state_{0.0}; // Current state of the gripper normalized between 0.0 and 1.0
+  bool is_locked_{false};
   rclcpp::TimerBase::SharedPtr publish_state_timer_;
 };
 
