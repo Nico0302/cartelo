@@ -59,6 +59,19 @@ PoseTeleoperation::PoseTeleoperation(const rclcpp::NodeOptions & options)
         RCLCPP_ERROR(this->get_logger(), "Failed to stop teleoperation: %s", e.what());
       }
   });
+  joystick_handler_->register_on_press(params_.joystick.home_button, [this]() {
+      try {
+        RCLCPP_DEBUG(this->get_logger(), "Trigger homing");
+        trigger_homing();
+      } catch (const std::exception & e) {
+        RCLCPP_ERROR(this->get_logger(), "Failed to trigger homing: %s", e.what());
+      }
+  });
+
+  switch_controller_client_ = this->create_client<controller_manager_msgs::srv::SwitchController>(
+    "controller_manager/switch_controller");
+  follow_joint_trajectory_client_ = rclcpp_action::create_client<control_msgs::action::FollowJointTrajectory>(
+    this, params_.home.joint_controller_name + "/follow_joint_trajectory");
 
   pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(
     "target_pose", 3);
@@ -125,6 +138,85 @@ void PoseTeleoperation::stop_teleoperation()
 {
   delta_.reset();
   last_controller_transform_.reset();
+}
+
+void PoseTeleoperation::trigger_homing()
+{
+  stop_teleoperation();
+
+  if (!switch_controller_client_->service_is_ready()) {
+    RCLCPP_ERROR(this->get_logger(), "Switch controller service not available");
+    return;
+  }
+
+  if (!follow_joint_trajectory_client_->action_server_is_ready()) {
+    RCLCPP_ERROR(this->get_logger(), "Follow joint trajectory action server not available");
+    return;
+  }
+
+  // 1. Switch to joint controller
+  auto switch_req = std::make_shared<controller_manager_msgs::srv::SwitchController::Request>();
+  switch_req->activate_controllers.push_back(params_.home.joint_controller_name);
+  switch_req->deactivate_controllers.push_back(params_.cartesian_controller_name);
+  switch_req->strictness = controller_manager_msgs::srv::SwitchController::Request::STRICT;
+  switch_req->activate_asap = true;
+
+  switch_controller_client_->async_send_request(
+    switch_req,
+    [this](rclcpp::Client<controller_manager_msgs::srv::SwitchController>::SharedFuture future) {
+      try {
+        auto response = future.get();
+        if (!response->ok) {
+          RCLCPP_ERROR(this->get_logger(), "Failed to switch controllers (to joint): %s", response->message.c_str());
+          return;
+        }
+      } catch (const std::exception & e) {
+        RCLCPP_ERROR(this->get_logger(), "Service call failed: %s", e.what());
+        return;
+      }
+
+      // 2. Move to home
+      auto goal_msg = control_msgs::action::FollowJointTrajectory::Goal();
+      goal_msg.trajectory.joint_names = params_.home.joint_names;
+      
+      trajectory_msgs::msg::JointTrajectoryPoint point;
+      point.positions = params_.home.joint_positions;
+      point.time_from_start = rclcpp::Duration::from_seconds(5.0); // TODO: Make configurable?
+      goal_msg.trajectory.points.push_back(point);
+
+      auto send_goal_options = rclcpp_action::Client<control_msgs::action::FollowJointTrajectory>::SendGoalOptions();
+      send_goal_options.result_callback = [this](const rclcpp_action::ClientGoalHandle<control_msgs::action::FollowJointTrajectory>::WrappedResult & result) {
+        if (result.code != rclcpp_action::ResultCode::SUCCEEDED) {
+          RCLCPP_ERROR(this->get_logger(), "Homing trajectory failed");
+          // Even if it failed, we might want to try switching back? 
+          // For now, let's try to switch back to ensure we don't leave the robot in a bad state.
+        }
+
+        // 3. Switch back to cartesian controller
+        auto switch_req_back = std::make_shared<controller_manager_msgs::srv::SwitchController::Request>();
+        switch_req_back->activate_controllers.push_back(params_.cartesian_controller_name);
+        switch_req_back->deactivate_controllers.push_back(params_.home.joint_controller_name);
+        switch_req_back->strictness = controller_manager_msgs::srv::SwitchController::Request::STRICT;
+        switch_req_back->activate_asap = true;
+
+        switch_controller_client_->async_send_request(
+          switch_req_back,
+          [this](rclcpp::Client<controller_manager_msgs::srv::SwitchController>::SharedFuture future_back) {
+            try {
+              auto response_back = future_back.get();
+              if (!response_back->ok) {
+                RCLCPP_ERROR(this->get_logger(), "Failed to switch controllers (to cartesian): %s", response_back->message.c_str());
+                return;
+              }
+              RCLCPP_INFO(this->get_logger(), "Homing completed successfully");
+            } catch (const std::exception & e) {
+              RCLCPP_ERROR(this->get_logger(), "Service call failed: %s", e.what());
+            }
+          });
+      };
+
+      follow_joint_trajectory_client_->async_send_goal(goal_msg, send_goal_options);
+    });
 }
 
 std::optional<geometry_msgs::msg::TransformStamped> PoseTeleoperation::get_frame_transform()

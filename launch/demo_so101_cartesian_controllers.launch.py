@@ -88,6 +88,17 @@ def generate_launch_description():
                 "bounds.y_max": 0.4,
                 "use_relative_pose": False,
                 "update_rate": 100,
+                "home.joint_controller_name": "joint_trajectory_controller",
+                "cartesian_controller_name": "cartesian_motion_controller",
+                "home.joint_names": [
+                    "elbow_flex",
+                    "shoulder_lift",
+                    "shoulder_pan",
+                    "wrist_flex",
+                    "wrist_roll",
+                ],
+                "home.joint_positions": [1.578, -1.7453, 0.0, 1.2, 0.0],
+                "joystick.home_button": 3,
             }
         ],
     )

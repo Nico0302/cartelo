@@ -23,6 +23,9 @@
 
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/transform_stamped.hpp"
+#include "controller_manager_msgs/srv/switch_controller.hpp"
+#include "rclcpp_action/rclcpp_action.hpp"
+#include "control_msgs/action/follow_joint_trajectory.hpp"
 #include "cartelo/pose_teleoperation_parameters.hpp"
 #include "cartelo/joystick_handler.hpp"
 
@@ -52,7 +55,17 @@ private:
    * @brief Stop teleoperation by clearing the transform delta.
    *
    */
+  /**
+   * @brief Stop teleoperation by clearing the transform delta.
+   *
+   */
   void stop_teleoperation();
+
+  /**
+   * @brief Trigger the homing sequence.
+   *
+   */
+  void trigger_homing();
 
   /**
    * @brief Publish the target end-effector pose based on the controller's current pose and the transform delta.
@@ -83,6 +96,9 @@ private:
   std::optional<tf2::Transform> last_controller_transform_;
   std::optional<tf2::Transform> delta_;
   std::optional<geometry_msgs::msg::TransformStamped> frame_transform_;
+
+  rclcpp::Client<controller_manager_msgs::srv::SwitchController>::SharedPtr switch_controller_client_;
+  rclcpp_action::Client<control_msgs::action::FollowJointTrajectory>::SharedPtr follow_joint_trajectory_client_;
 };
 
 }  // namespace cartelo

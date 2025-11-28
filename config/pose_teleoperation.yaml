@@ -30,10 +30,34 @@ pose_teleoperation:
       type: int
       default_value: 7
       description: "Button to start/stop teleoperation (while being pressed)"
+    home_button:
+      type: int
+      default_value: 8
+      description: "Button to home the end effector"
+
+  home:
+    joint_controller_name:
+      type: string
+      default_value: "joint_trajectory_controller"
+      description: "Name of the joint controller to use for homing"
+    joint_names:
+      type: string_array
+      default_value: []
+      description: "Names of the joints to home"
+    joint_positions:
+      type: double_array
+      default_value: []
+      description: "Positions of the joints to home"
+
   update_rate:
     type: int
     default_value: 100
     description: "Rate at which to publish target pose in Hz"
+
+  cartesian_controller_name:
+    type: string
+    default_value: "cartesian_motion_controller"
+    description: "Name of the Cartesian controller to use for teleoperation"
 
   bounds:
     enabled:

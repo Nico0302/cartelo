@@ -14,7 +14,6 @@
         "vscode": {
             "extensions": [
                 "ms-python.python",
-                "ms-vscode.cmake-tools",
                 "llvm-vs-code-extensions.vscode-clangd",
                 "streetsidesoftware.code-spell-checker",
                 "ranch-hand-robotics.rde-ros-2",

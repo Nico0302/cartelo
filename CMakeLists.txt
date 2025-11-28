@@ -62,6 +62,7 @@ ament_target_dependencies(pose_teleoperation_component
   tf2_ros
   tf2_geometry_msgs
   controller_manager_msgs
+  control_msgs
 )
 
 rclcpp_components_register_node(pose_teleoperation_component PLUGIN "cartelo::PoseTeleoperation" EXECUTABLE pose_teleoperation_node)
