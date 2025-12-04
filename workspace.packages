@@ -3,6 +3,7 @@ liblapacke-dev
 libopenblas-dev
 libpcap-dev
 libusb-1.0-0-dev
+libhidapi-dev
 libx11-dev
 zlib1g-dev
 libpoco-dev

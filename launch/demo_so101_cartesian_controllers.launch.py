@@ -30,6 +30,11 @@ def generate_launch_description():
             default_value="false",
             description="Use mock system",
         ),
+        DeclareLaunchArgument(
+            "controller_frame_id",
+            default_value="LHR-441376B3",
+            description="The frame ID for the controller",
+        ),
     ]
 
     # Configuration variables
@@ -37,6 +42,7 @@ def generate_launch_description():
     usb_port = LaunchConfiguration("usb_port")
     use_sim = LaunchConfiguration("use_sim")
     use_fake_hardware = LaunchConfiguration("use_fake_hardware")
+    controller_frame_id = LaunchConfiguration("controller_frame_id")
 
     vive_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -79,6 +85,7 @@ def generate_launch_description():
         name="pose_teleoperation",
         parameters=[
             {
+                "controller_frame_id": controller_frame_id,
                 "end_effector_frame_id": "gripper_frame_link",
                 "bounds.z_min": 0.01,
                 "bounds.z_max": 0.4,
