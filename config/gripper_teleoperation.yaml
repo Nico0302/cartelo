@@ -1,4 +1,9 @@
 gripper_teleoperation:
+  controller_frame_id:
+    type: string
+    default_value: "LHR-FF29DD46"
+    description: "Frame ID for the 3D tracking controller"
+
   joystick:
     open_button: 
       type: int

@@ -35,6 +35,11 @@ pose_teleoperation:
       default_value: 8
       description: "Button to home the end effector"
 
+  frame_transform:
+    type: double_array
+    default_value: [0.0, 0.0, 0.0, -3.1415926536, -3.1415926536]
+    description: "Transform between the robot base and the controller frame to calibrate the world frame ([x, y, z, roll, pitch, yaw] in meters and radians)"
+
   home:
     joint_controller_name:
       type: string

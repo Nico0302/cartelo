@@ -34,7 +34,7 @@ PoseTeleoperation::PoseTeleoperation(const rclcpp::NodeOptions & options)
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
   tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 
-  joystick_handler_ = std::make_shared<JoystickHandler>(this);
+  joystick_handler_ = std::make_shared<JoystickHandler>(this, params_.controller_frame_id);
   joystick_handler_->register_on_press(params_.joystick.calibrate_button, [this]() {
       try {
         RCLCPP_INFO(this->get_logger(), "Calibrate frame");
@@ -241,13 +241,10 @@ std::optional<geometry_msgs::msg::TransformStamped> PoseTeleoperation::get_frame
   tf2::Transform v_T_c;
   tf2::fromMsg(v_T_c_msg.transform, v_T_c);
 
-  // X -> -Z, Y -> -X, Z -> Y
-  tf2::Matrix3x3 rot_mat(
-    0, -1, 0,
-    0, 0, 1,
-    -1, 0, 0);
-  tf2::Vector3 trans_vec(0, 0, 0);
-  tf2::Transform conversion_transform(rot_mat, trans_vec);
+  tf2::Quaternion rot_quat;
+  rot_quat.setRPY(params_.frame_transform[3], params_.frame_transform[4], params_.frame_transform[5]);
+  tf2::Vector3 trans_vec(params_.frame_transform[0], params_.frame_transform[1], params_.frame_transform[2]);
+  tf2::Transform conversion_transform(rot_quat, trans_vec);
 
   tf2::Transform v_T_b_transform = v_T_c * conversion_transform;
   b_T_v_msg.transform = tf2::toMsg(v_T_b_transform.inverse());

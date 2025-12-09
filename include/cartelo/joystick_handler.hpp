@@ -50,9 +50,10 @@ public:
    * @brief Construct a new Joystick Handler object
    *
    * @param node ROS 2 node pointer.
-   * @param topic_name Name referenceof the joystick topic to subscribe to.
+   * @param frame_id Frame name of the joystick to subscribe to.
+   * @param topic_name Name of the joystick topic to subscribe to.
    */
-  JoystickHandler(rclcpp::Node * node, const std::string & topic_name = "joy");
+  JoystickHandler(rclcpp::Node * node, const std::string & frame_id, const std::string & topic_name = "joy");
 
   /**
    * @brief Register a callback to be called when a button is pressed.
@@ -84,6 +85,7 @@ private:
 
   using AxisConfig = std::pair<AxisCallback, float>;
 
+  std::string frame_id_;
   rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
   std::vector<int> last_buttons_;
   std::vector<float> last_axes_;

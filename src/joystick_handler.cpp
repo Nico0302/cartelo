@@ -17,8 +17,10 @@
 namespace cartelo
 {
 
-JoystickHandler::JoystickHandler(rclcpp::Node * node, const std::string & topic_name)
+JoystickHandler::JoystickHandler(rclcpp::Node * node, const std::string & frame_id, const std::string & topic_name)
 {
+  frame_id_ = frame_id;
+  
   joy_sub_ = node->create_subscription<sensor_msgs::msg::Joy>(
     topic_name, 1,
     std::bind(&JoystickHandler::joystick_callback, this, std::placeholders::_1));
@@ -41,6 +43,10 @@ void JoystickHandler::register_on_axis_change(int axis_index, std::function<void
 
 void JoystickHandler::joystick_callback(const sensor_msgs::msg::Joy::SharedPtr msg)
 {
+  if (frame_id_ != msg->header.frame_id) {
+    return;
+  }
+
   if (msg->buttons.empty() && msg->axes.empty()) {
     return;
   }

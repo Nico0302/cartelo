@@ -39,7 +39,7 @@ GripperTeleoperation::GripperTeleoperation(const rclcpp::NodeOptions & options)
       std::bind(&GripperTeleoperation::publish_state, this));
   }
 
-  joystick_handler_ = std::make_shared<JoystickHandler>(this);
+  joystick_handler_ = std::make_shared<JoystickHandler>(this, params_.controller_frame_id);
   // Open button
   if (params_.joystick.open_button >= 0) {
     joystick_handler_->register_on_press(
