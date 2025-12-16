@@ -23,7 +23,7 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             "controller_frame_id",
-            default_value="LHR-441376B3",
+            default_value="right_hand",
             description="The frame ID for the controller",
         ),
         DeclareLaunchArgument(
@@ -58,9 +58,6 @@ def generate_launch_description():
         package="cartelo",
         plugin="cartelo::PoseTeleoperation",
         name="pose_teleoperation",
-        remappings=[
-            ("/joy", "/libsurvive/joy"),
-        ],
         parameters=[
             teleoperation_config,
             {
@@ -73,9 +70,6 @@ def generate_launch_description():
         package="cartelo",
         plugin="cartelo::GripperTeleoperation",
         name="gripper_teleoperation",
-        remappings=[
-            ("/joy", "/libsurvive/joy"),
-        ],
         parameters=[
             teleoperation_config,
             {
@@ -88,10 +82,9 @@ def generate_launch_description():
         package="libsurvive_ros2",
         plugin="libsurvive_ros2::Component",
         name="libsurvive_ros2_component",
-        namespace="libsurvive",
         parameters=[
             {"driver_args": "--v 100 --force-calibrate"},
-            {"tracking_frame": "libsurvive_world"},
+            {"tracking_frame": "virtual_world"},
             {"imu_topic": "imu"},
             {"joy_topic": "joy"},
             {"cfg_topic": "cfg"},

@@ -36,7 +36,7 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             "controller_frame_id",
-            default_value="LHR-441376B3",
+            default_value="right_hand",
             description="The frame ID for the controller",
         ),
     ]

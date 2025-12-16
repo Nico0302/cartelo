@@ -1,11 +1,11 @@
 pose_teleoperation:
   virtual_world_frame_id:
     type: string
-    default_value: "teleop_world"
+    default_value: "virtual_world"
     description: "Frame ID for the virtual world (reference frame for the 3D tracking controller)"
   controller_frame_id:
     type: string
-    default_value: "LHR-FF29DD46"
+    default_value: "right_hand"
     description: "Frame ID for the 3D tracking controller"
   base_frame_id:
     type: string
@@ -24,20 +24,20 @@ pose_teleoperation:
   joystick:
     calibrate_button:
       type: int
-      default_value: 6
+      default_value: 7
       description: "Button to calibrate the frame"
     teleoperate_button:
       type: int
-      default_value: 7
+      default_value: 2
       description: "Button to start/stop teleoperation (while being pressed)"
     home_button:
       type: int
-      default_value: 8
+      default_value: 3
       description: "Button to home the end effector"
 
   frame_transform:
     type: double_array
-    default_value: [0.0, 0.0, 0.0, -3.1415926536, -3.1415926536]
+    default_value: [0.0, 0.0, 0.0, 1.5707963, -1.5707963, 0]
     description: "Transform between the robot base and the controller frame to calibrate the world frame ([x, y, z, roll, pitch, yaw] in meters and radians)"
 
   home:
