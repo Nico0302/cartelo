@@ -1,5 +1,9 @@
 twist_teleoperation:
-  joystick_frame_id:
+  twist_topic:
+    type: string
+    default_value: "/spacenav/twist"
+    description: "Topic name for input twist messages"
+  controller_frame_id:
     type: string
     default_value: ""
     description: "Frame ID for the spacemouse"

@@ -28,6 +28,11 @@ generate_parameter_library(
   "config/gripper_teleoperation.yaml"
 )
 
+generate_parameter_library(
+  twist_teleoperation_parameters
+  "config/twist_teleoperation.yaml"
+)
+
 add_library(pose_teleoperation_component SHARED
   src/pose_teleoperation.cpp
   src/joystick_handler.cpp
@@ -40,6 +45,20 @@ target_include_directories(pose_teleoperation_component PUBLIC
 target_compile_features(pose_teleoperation_component PUBLIC c_std_99 cxx_std_17)
 target_link_libraries(pose_teleoperation_component
   pose_teleoperation_parameters
+)
+
+add_library(twist_teleoperation_component SHARED
+  src/twist_teleoperation.cpp
+  src/joystick_handler.cpp
+  src/homing_handler.cpp
+)
+target_include_directories(twist_teleoperation_component PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_compile_features(twist_teleoperation_component PUBLIC c_std_99 cxx_std_17)
+target_link_libraries(twist_teleoperation_component
+  twist_teleoperation_parameters
 )
 
 add_library(gripper_teleoperation_component SHARED
@@ -68,6 +87,19 @@ ament_target_dependencies(pose_teleoperation_component
 
 rclcpp_components_register_node(pose_teleoperation_component PLUGIN "cartelo::PoseTeleoperation" EXECUTABLE pose_teleoperation_node)
 
+ament_target_dependencies(twist_teleoperation_component
+  rclcpp
+  rclcpp_components
+  geometry_msgs
+  sensor_msgs
+  tf2_ros
+  tf2_geometry_msgs
+  controller_manager_msgs
+  control_msgs
+)
+
+rclcpp_components_register_node(twist_teleoperation_component PLUGIN "cartelo::TwistTeleoperation" EXECUTABLE twist_teleoperation_node)
+
 ament_target_dependencies(gripper_teleoperation_component
   rclcpp
   rclcpp_components
@@ -90,7 +122,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-install(TARGETS pose_teleoperation_component gripper_teleoperation_component
+install(TARGETS pose_teleoperation_component twist_teleoperation_component gripper_teleoperation_component
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
