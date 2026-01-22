@@ -6,7 +6,7 @@ pose_teleoperation:
   controller_frame_id:
     type: string
     default_value: ""
-    description: "Frame ID for the 3D tracking controller"
+    description: "Frame ID for the joystick controller (used for input filtering)"
   base_frame_id:
     type: string
     default_value: "base_link"
@@ -15,11 +15,6 @@ pose_teleoperation:
     type: string
     default_value: "gripper_link"
     description: "Frame ID for the robot arm end effector"
-
-  use_relative_pose:
-    type: bool
-    default_value: False
-    description: "Use relative poses for teleoperation (if false, absolute poses are used, which is recommended)"
 
   joystick:
     calibrate_button:
@@ -37,7 +32,7 @@ pose_teleoperation:
 
   frame_transform:
     type: double_array
-    default_value: [0.0, 0.0, 0.0, 1.5707963, -1.5707963, 0]
+    default_value: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     description: "Transform between the robot base and the controller frame to calibrate the world frame ([x, y, z, roll, pitch, yaw] in meters and radians)"
 
   home:
@@ -53,11 +48,6 @@ pose_teleoperation:
       type: double_array
       default_value: []
       description: "Positions of the joints to home"
-
-  update_rate:
-    type: int
-    default_value: 100
-    description: "Rate at which to publish target pose in Hz"
 
   cartesian_controller_name:
     type: string

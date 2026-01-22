@@ -56,5 +56,5 @@ gripper_teleoperation:
 
   publishing_rate:
     type: int
-    default_value: 100
+    default_value: 60
     description: "Publishing rate for the target_gripper topic in Hz (set to 0 to disable publishing)"
