@@ -102,6 +102,10 @@ private:
   bool is_homed_{ false };
 
   std::shared_ptr<HomingHandler> homing_handler_;
+
+  tf2::Vector3 smoothed_pos_;
+  tf2::Quaternion smoothed_rot_;
+  bool is_first_run_ = true;
 };
 
 }  // namespace cartelo

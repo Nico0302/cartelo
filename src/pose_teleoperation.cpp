@@ -282,6 +282,17 @@ void PoseTeleoperation::publish_target_pose()
     pos.setZ(std::clamp(pos.z(), params_.bounds.z_min, params_.bounds.z_max));
   }
 
+  const double alpha = params_.smoothing_factor; // Add this to your ROS parameters
+
+  if (is_first_run_) {
+      smoothed_pos_ = pos;
+      smoothed_rot_ = rot;
+      is_first_run_ = false;
+  } else {
+      smoothed_pos_ = smoothed_pos_.lerp(pos, alpha);
+      smoothed_rot_ = smoothed_rot_.slerp(rot, alpha);
+  }
+
   msg.pose.position.x = pos.x();
   msg.pose.position.y = pos.y();
   msg.pose.position.z = pos.z();

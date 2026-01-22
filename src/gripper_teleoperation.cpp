@@ -33,7 +33,7 @@ GripperTeleoperation::GripperTeleoperation(const rclcpp::NodeOptions & options)
       params_.gripper_command_topic);
 
   if (params_.publishing_rate > 0) {
-    state_pub_ = this->create_publisher<sensor_msgs::msg::JointState>("gripper_state", 10);
+    state_pub_ = this->create_publisher<sensor_msgs::msg::JointState>("target_gripper", 10);
     publish_state_timer_ = this->create_wall_timer(
       std::chrono::milliseconds(1000 / params_.publishing_rate),
       std::bind(&GripperTeleoperation::publish_state, this));

@@ -19,7 +19,7 @@ pose_teleoperation:
   use_relative_pose:
     type: bool
     default_value: False
-    description: "Use relative poses for teleoperation (if false, absolute poses are used)"
+    description: "Use relative poses for teleoperation (if false, absolute poses are used, which is recommended)"
 
   joystick:
     calibrate_button:
@@ -63,6 +63,13 @@ pose_teleoperation:
     type: string
     default_value: "cartesian_motion_controller"
     description: "Name of the Cartesian controller to use for teleoperation"
+
+  smoothing_factor:
+    type: double
+    description: "Smoothing factor between 1.0 (no smoothing) and 0.1 (high smooting, with latency)"
+    default_value: 0.9
+    validation:
+      bounds<>: [0.01, 1.0]
 
   bounds:
     enabled:
